@@ -10,8 +10,15 @@ class CampaignAPI {
   private client: AxiosInstance;
 
   constructor() {
+    const baseURL = process.env.REACT_APP_API_URL || 'https://api.gateway.url/prod';
+    
+    // Check if API URL is configured
+    if (baseURL === 'https://api.gateway.url/prod') {
+      console.warn('⚠️ API URL not configured. Please set REACT_APP_API_URL in your .env file');
+    }
+    
     this.client = axios.create({
-      baseURL: process.env.REACT_APP_API_URL || 'https://api.gateway.url/prod',
+      baseURL,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -58,6 +65,17 @@ class CampaignAPI {
         data: response.data,
       };
     } catch (error: any) {
+      // Check for network errors
+      if (error.code === 'ERR_NETWORK' || error.code === 'ERR_NAME_NOT_RESOLVED') {
+        return {
+          success: false,
+          error: {
+            message: 'Cannot connect to server. Please ensure the backend is deployed and API URL is configured.',
+            details: 'Check your .env file for REACT_APP_API_URL configuration',
+          },
+        };
+      }
+      
       return {
         success: false,
         error: {
@@ -77,6 +95,17 @@ class CampaignAPI {
         data: response.data,
       };
     } catch (error: any) {
+      // Check for network errors
+      if (error.code === 'ERR_NETWORK' || error.code === 'ERR_NAME_NOT_RESOLVED') {
+        return {
+          success: false,
+          error: {
+            message: 'Cannot connect to server. Please ensure the backend is deployed and API URL is configured.',
+            details: 'Check your .env file for REACT_APP_API_URL configuration',
+          },
+        };
+      }
+      
       return {
         success: false,
         error: {
