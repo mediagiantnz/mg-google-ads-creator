@@ -14,6 +14,7 @@ export function parseMDFile(content: string): Campaign[] {
   let campaignId = 0;
   let inCampaignSection = false;
   let currentCampaignName: string | null = null;
+  const processedCampaigns = new Set<string>(); // Track processed campaign names to avoid duplicates
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -72,51 +73,22 @@ export function parseMDFile(content: string): Campaign[] {
         // Skip if it's marked as already created
         const nextFewLines = lines.slice(i, i + 5).join('\n');
         if (!nextFewLines.includes('ALREADY CREATED')) {
-          campaigns.push({
-            id: `campaign-${++campaignId}`,
-            name: currentCampaignName,
-            tier: currentTier as 1 | 2 | 3 | 4,
-            dailyBudget: dailyBudget,
-            monthlyBudget: dailyBudget * 30, // Approximate monthly budget
-            status: CampaignStatus.PENDING,
-          });
+          // Check if we haven't already processed this campaign
+          const campaignKey = `${currentTier}-${currentCampaignName}`;
+          if (!processedCampaigns.has(campaignKey)) {
+            campaigns.push({
+              id: `campaign-${++campaignId}`,
+              name: currentCampaignName,
+              tier: currentTier as 1 | 2 | 3 | 4,
+              dailyBudget: dailyBudget,
+              monthlyBudget: dailyBudget * 30, // Approximate monthly budget
+              status: CampaignStatus.PENDING,
+            });
+            processedCampaigns.add(campaignKey);
+          }
         }
       }
       currentCampaignName = null;
-    }
-    
-    // Alternative format: Look for campaign name and budget on separate lines
-    // **Campaign Name:** T1-Search-Masterton-Nelson
-    const campaignNameMatch = trimmedLine.match(/\*?\*?Campaign Name:?\*?\*?\s*(.+)/i);
-    if (campaignNameMatch && currentTier && inCampaignSection) {
-      const campaignName = campaignNameMatch[1].trim();
-      
-      // Look for budget in the next few lines
-      for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
-        const nextLine = lines[j].trim();
-        const nextBudgetMatch = nextLine.match(/\*?\*?Daily Budget:?\*?\*?\s*\$?([\d,]+\.?\d*)/i);
-        
-        if (nextBudgetMatch) {
-          const budgetStr = nextBudgetMatch[1].replace(/,/g, '');
-          const dailyBudget = parseFloat(budgetStr);
-          
-          if (!isNaN(dailyBudget) && dailyBudget > 0) {
-            // Skip if it's marked as already created
-            const checkLines = lines.slice(i, j + 3).join('\n');
-            if (!checkLines.includes('ALREADY CREATED')) {
-              campaigns.push({
-                id: `campaign-${++campaignId}`,
-                name: campaignName,
-                tier: currentTier as 1 | 2 | 3 | 4,
-                dailyBudget: dailyBudget,
-                monthlyBudget: dailyBudget * 30,
-                status: CampaignStatus.PENDING,
-              });
-            }
-          }
-          break;
-        }
-      }
     }
   }
   
