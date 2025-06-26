@@ -10,7 +10,7 @@ export enum CampaignStatus {
 export interface Campaign {
   id: string;
   name: string;
-  tier: 1 | 2 | 3;
+  tier: 1 | 2 | 3 | 4;
   dailyBudget: number;
   monthlyBudget: number;
   status: CampaignStatus;

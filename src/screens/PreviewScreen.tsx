@@ -83,7 +83,7 @@ export const PreviewScreen: React.FC = () => {
               </p>
             </div>
 
-            {[1, 2, 3].map((tier) => {
+            {[1, 2, 3, 4].map((tier) => {
               const tierCampaigns = campaignsByTier[tier];
               if (tierCampaigns.length === 0) return null;
 
