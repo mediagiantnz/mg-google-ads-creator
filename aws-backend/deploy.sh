@@ -58,10 +58,20 @@ API_URL=$(aws cloudformation describe-stacks \
 
 echo -e "${GREEN}✅ Deployment completed!${NC}"
 echo -e "${GREEN}API URL: ${API_URL}${NC}"
-echo -e "${YELLOW}📝 Don't forget to:${NC}"
+
+# Run tagging script
+echo -e "${YELLOW}🏷️  Applying tags to additional resources...${NC}"
+if [ -f "./tag-resources.sh" ]; then
+    ./tag-resources.sh
+else
+    echo -e "${YELLOW}⚠️  tag-resources.sh not found. Please run it manually to tag CloudWatch logs and S3 bucket.${NC}"
+fi
+
+echo -e "\n${YELLOW}📝 Don't forget to:${NC}"
 echo -e "  1. Update the .env file with: REACT_APP_API_URL=${API_URL}"
 echo -e "  2. Add Google Ads OAuth credentials to Secrets Manager"
 echo -e "  3. Deploy the React app to AWS Amplify"
+echo -e "  4. Verify all resources are tagged: aws resourcegroupstaggingapi get-resources --region ${REGION} --tag-filters Key=ClientName,Values=MediaGiant"
 
 # Clean up
 rm -f lambda-deployment.zip
