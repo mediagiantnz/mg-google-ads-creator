@@ -1,46 +1,158 @@
-# Getting Started with Create React App
+# Google Ads Campaign Creator
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Internal tool for Media Giant to automate Google Ads campaign creation from Markdown specification files.
+
+## Features
+
+- Upload MD files containing campaign specifications
+- Preview campaigns with budget calculations
+- Batch create campaigns via Google Ads API
+- Real-time progress tracking
+- Export campaign creation reports
+
+## Tech Stack
+
+- **Frontend**: React, TypeScript, Tailwind CSS
+- **Backend**: AWS Lambda, API Gateway, DynamoDB
+- **Infrastructure**: AWS CloudFormation
+- **Deployment**: AWS Amplify (Frontend), AWS SAM (Backend)
+
+## Setup Instructions
+
+### Prerequisites
+
+- Node.js 18.x or higher
+- AWS CLI configured with appropriate credentials
+- Google Ads API access (developer token, OAuth credentials)
+
+### Local Development
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Create `.env` file:
+```bash
+cp .env.example .env
+# Update REACT_APP_API_URL with your API Gateway URL
+```
+
+3. Start development server:
+```bash
+npm start
+```
+
+### AWS Deployment
+
+1. Deploy backend infrastructure:
+```bash
+cd aws-backend
+./deploy.sh
+```
+
+2. Add Google Ads OAuth credentials to AWS Secrets Manager:
+```bash
+aws secretsmanager update-secret \
+  --secret-id mg-googleads-oauth-credentials-prod \
+  --secret-string '{
+    "client_id": "YOUR_CLIENT_ID",
+    "client_secret": "YOUR_CLIENT_SECRET",
+    "refresh_token": "YOUR_REFRESH_TOKEN",
+    "developer_token": "YOUR_DEVELOPER_TOKEN"
+  }'
+```
+
+3. Build and deploy frontend:
+```bash
+npm run build
+# Deploy build folder to AWS Amplify or S3 + CloudFront
+```
+
+## MD File Format
+
+The tool expects MD files with campaigns organized by tiers:
+
+```markdown
+## Tier 1
+Campaign Name 1 - $46.67
+Campaign Name 2 - $11.67
+
+## Tier 2
+Campaign Name 3 - $5.83
+Campaign Name 4 - $3.50
+
+## Tier 3
+Campaign Name 5 - $2.33
+Campaign Name 6 - $1.17
+```
+
+## Campaign Settings
+
+All campaigns are created with:
+- **Type**: Search
+- **Bidding**: Maximize Clicks
+- **Networks**: Search + Search Partners
+- **Location**: New Zealand
+- **Language**: English
+- **Status**: Paused (for safety)
+
+## Environment Variables
+
+- `REACT_APP_API_URL`: API Gateway endpoint URL
+- `REACT_APP_DEBUG`: Enable debug mode (optional)
+
+## AWS Resources
+
+All AWS resources are tagged with:
+- `ClientName`: MediaGiant
+- `Project`: Google Ads
+
+Resource naming convention: `mg-googleads-*`
+
+## Architecture
+
+1. User uploads MD file via React app
+2. Lambda function parses file and creates job in DynamoDB
+3. DynamoDB Stream triggers campaign creation Lambda
+4. Campaign creation Lambda calls Google Ads API
+5. Frontend polls for status updates
+6. User can download completion report
+
+## Security
+
+- OAuth tokens stored in AWS Secrets Manager
+- API Gateway with CORS configured
+- DynamoDB with encryption at rest
+- Lambda functions with minimal IAM permissions
+
+## Troubleshooting
+
+### Common Issues
+
+1. **CORS errors**: Check API Gateway CORS configuration
+2. **Authentication failures**: Verify OAuth tokens in Secrets Manager
+3. **Rate limiting**: Campaign creation includes 2-second delays
+4. **Failed campaigns**: Check Lambda logs in CloudWatch
+
+### Logging
+
+All Lambda functions log to CloudWatch Logs:
+- `/aws/lambda/mg-googleads-parse-md-prod`
+- `/aws/lambda/mg-googleads-get-status-prod`
+- `/aws/lambda/mg-googleads-create-campaigns-prod`
 
 ## Available Scripts
 
-In the project directory, you can run:
-
 ### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Runs the app in development mode at [http://localhost:3000](http://localhost:3000)
 
 ### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Launches the test runner in interactive watch mode
 
 ### `npm run build`
+Builds the app for production to the `build` folder
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Support
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+For issues or questions, contact the Media Giant development team.

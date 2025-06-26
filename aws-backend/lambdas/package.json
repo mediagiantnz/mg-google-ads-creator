@@ -1,0 +1,18 @@
+{
+  "name": "mg-googleads-lambdas",
+  "version": "1.0.0",
+  "description": "Lambda functions for Google Ads Campaign Creator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package": "zip -r lambdas.zip *.js node_modules/"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1400.0",
+    "uuid": "^9.0.0",
+    "google-ads-api": "^12.0.0"
+  },
+  "devDependencies": {},
+  "author": "Media Giant",
+  "license": "ISC"
+}
